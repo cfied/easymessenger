@@ -8,18 +8,21 @@ import javax.swing.*;
 public class Chat extends JFrame {
 	private JButton sendButton;
 	private JScrollPane chatScrollPane;
-	private JScrollPane messScrollPane;
+	JScrollPane messScrollPane;
 	private JTextField textField;
 	private final int WIDTH = 1500;
 	private final int HEIGHT = 900;
 	private ArrayList<Message> messages;
 	MySQLAccess access = new MySQLAccess();
 	
+	JList<String> list;
+	DefaultListModel<String> model;
+	
 	public static void main(String[] args) throws SQLException{
 		new Chat();
 	}
 	
-	private void initComponents(JScrollPane messScrollPane){
+	public void initComponents(){
 		sendButton = new JButton();
 		chatScrollPane = new JScrollPane();
 		textField = new JTextField();
@@ -69,15 +72,22 @@ public class Chat extends JFrame {
 		for(int i = 0; i < messages.size(); i++) {
 			messageList[i] = messages.get(i).getText();
 		}
-		JList<String> list = new JList<>(messageList);
+		model = new DefaultListModel<>();
+		list = new JList<String>(model);
+		for(String m : messageList){
+			model.addElement(m);
+		}
 		list.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
-		JScrollPane scrollList = new JScrollPane(list);
-
-		initComponents(scrollList);
+		messScrollPane = new JScrollPane(list);
+		
+		initComponents();
 		
 		this.setSize(WIDTH, HEIGHT);
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		Update update = new Update(this);
+		update.run();
 	}
 	
 	public void addMessage(){
