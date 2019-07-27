@@ -1,7 +1,4 @@
-import java.awt.Font;
 import java.util.ArrayList;
-
-import javax.swing.JList;
 
 public class Update extends Thread{
 	private MySQLAccess access = new MySQLAccess();
@@ -14,28 +11,29 @@ public class Update extends Thread{
 		super();
 		this.chat = chat;
 		access.connectToMysql("127.0.0.1:3306", "easymessenger", "testuser", "testpassword");
-		oldMessages = access.executeQuery("select * from messages");
-		
-		
+		oldMessages = access.getMessages();
 	}
 	
 	//@Override
 	public void run() {
 		while(true) {
-			newMessages = access.executeQuery("select * from messages");
+			newMessages = access.getMessages();
 			
 			int oldSize = oldMessages.size();
 			int newSize = newMessages.size();
 			if(newSize > oldSize){
 				for(int i = oldSize; i<newSize; i++) {
-					chat.model.addElement(newMessages.get(i).getText());
+					chat.messageModel.addElement(newMessages.get(i).getText());
+				}
+			}else if(newSize < oldSize){
+				for(int i = 0; i < oldMessages.size(); i++){
+					if(!newMessages.contains(oldMessages.get(i))){
+						//should messages be renumbered?
+						chat.messageModel.set(Integer.parseInt(oldMessages.get(i).getID()), "This message has been removed");
+					}
 				}
 			}
-		
-			
 			oldMessages = newMessages;
-
 		}
 	}
-	
 }
