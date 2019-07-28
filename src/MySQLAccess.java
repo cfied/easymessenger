@@ -15,18 +15,43 @@ public class MySQLAccess {
 	}
 		
 		
-	public boolean connectToMysql(String host, String database, String user, String passwd){
-		try{	
+	public void connectToMysql(String host, String database, String user, String passwd) throws SQLException{
+		try {	
 			Class.forName("com.mysql.jdbc.Driver");
 			con = DriverManager.getConnection("jdbc:mysql://"+host+"/"+database+"?autoReconnect=true&verifyServerCertificate=false&useSSL=true", user, passwd);
 			System.out.println("Connected to database " + database + ":");
-			return true;
-		}catch(Exception e){
-			System.out.println(e.getMessage());
+		}catch(ClassNotFoundException e){
+			System.out.println(e);
+		}
+	}
+	
+	public boolean checkPassword(String username, String password) {
+		try {	
+			PreparedStatement stmt = con.prepareStatement("select password from users where user_name = ?");
+			stmt.setString(1, username);
+			ResultSet rs = stmt.executeQuery();
+			rs.next();
+			return rs.getString(1).equals(password);
+			
+		}catch(Exception e) {
+			System.out.println(e);
 			return false;
 		}
 	}
 	
+	public String getUserId(String username) {
+		try {	
+			PreparedStatement stmt = con.prepareStatement("select user_id from users where user_name = ?");
+			stmt.setString(1, username);
+			ResultSet rs = stmt.executeQuery();
+			rs.next();
+			return rs.getString(1);
+			
+		}catch(Exception e) {
+			System.out.println(e);
+			return null;
+		}
+	}
 	
 	public ArrayList<Message> getMessages(){
 		ArrayList<Message> results = new ArrayList<>();

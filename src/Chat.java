@@ -15,8 +15,10 @@ public class Chat extends JFrame {
 	private JScrollPane chatScrollPane;
 	private JScrollPane messScrollPane;
 	private JTextField textField;
+	
 	private final int WIDTH = 1500;
 	private final int HEIGHT = 900;
+	
 	private ArrayList<Message> messages;
 	private ArrayList<Group> groups;
 	MySQLAccess access = new MySQLAccess();
@@ -25,6 +27,10 @@ public class Chat extends JFrame {
 	DefaultListModel<String> messageModel;
 	JList<String> chatList;
 	DefaultListModel<String> chatModel;
+	
+	private String username;
+	private final String USERID;
+	private char[] password;
 	
 	public static void main(String[] args) throws SQLException{
 		new Chat();
@@ -145,9 +151,13 @@ public class Chat extends JFrame {
 	
 	public Chat() throws SQLException{
 		//precreated user
-		access.connectToMysql("127.0.0.1:3306", "easymessenger", "testuser", "testpassword");
+		PassWordDialog passDialog = new PassWordDialog(this, true);
+		passDialog.setVisible(true);
+		
+		USERID = access.getUserId(username);
 		messages = access.getMessages();
 		this.setTitle("EasyChat");
+		//list of messages
 		String[] messageList = new String[messages.size()];
 		for(int i = 0; i < messages.size(); i++) {
 			messageList[i] = messages.get(i).getText();
@@ -160,7 +170,7 @@ public class Chat extends JFrame {
 		messList.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
 		messScrollPane = new JScrollPane(messList);
 		
-		//copied
+		//list of groups
 		groups = access.getGroups();
 		String[] chList = new String[groups.size()];
 		for(int i = 0; i < groups.size(); i++) {
@@ -173,25 +183,33 @@ public class Chat extends JFrame {
 		}
 		chatList.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
 		chatScrollPane = new JScrollPane(chatList);
-		//copied
+
 		
 		initComponents();
 		
 		this.setSize(WIDTH, HEIGHT);
-		setVisible(true);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setVisible(true);
 		
 		Update update = new Update(this);
 		update.run();
 	}
 	
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	
+	public void setPassword(char[] password) {
+		this.password = password;
+	}
+	
 	private void sendMessage(){
-		String userid, messageid, text, receiverid;
-		userid = "00000001";
+		String messageid, text, receiverid;
+		//hardcoded
 		receiverid = "00000002";		
 		messageid = String.format("%08d", access.getMessages().size());
 		text = textField.getText();
-		Message m = new Message(userid, receiverid, messageid, text, false);
+		Message m = new Message(messageid, USERID, receiverid, text, false);
 		access.addMessage(m);
 		textField.setText("Write a message");
 	}
