@@ -91,6 +91,29 @@ public class PassWordDialog extends JDialog {
 			}
 		});
 		
+		jbtSignUp.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try{
+					MySQLAccess access = new MySQLAccess();
+					String username = jtfUsername.getText();
+					String password = jpfPassword.getText();
+					access.connectToMysql("127.0.0.1:3306", "easymessenger", "testuser", "testpassword");
+					if(access.addUser(username, password)){
+						parent.setUsername(username);
+						parent.access = access;
+						setVisible(false);
+					}else{
+						jlblStatus.setText("Username is already in use");
+						jtfUsername.setText("");
+						jpfPassword.setText("");
+					}
+				} catch(SQLException ex) {
+					System.out.println(ex);
+				}
+			}
+		});
+		
 		
 		
 	}

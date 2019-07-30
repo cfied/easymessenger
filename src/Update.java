@@ -29,21 +29,24 @@ public class Update extends Thread{
 			int newSizeG = newGroups.size();
 			
 			if(newSizeM > oldSizeM){
+				Message m;
 				for(int i = oldSizeM; i<newSizeM; i++) {
-					chat.messageModel.addElement(newMessages.get(i).getText());
+					m = newMessages.get(i);
+					if(chat.selectedGroupId.equals(m.getReceiverID()))
+					chat.messageModel.addElement(m);
 				}
 			}else if(newSizeM < oldSizeM){
 				for(int i = 0; i < oldMessages.size(); i++){
 					if(!newMessages.contains(oldMessages.get(i))){
 						//should messages be renumbered?
-						chat.messageModel.set(Integer.parseInt(oldMessages.get(i).getID()), "This message has been removed");
+						chat.messageModel.get(Integer.parseInt(oldMessages.get(i).getID())).setText("This message has been removed");
 					}
 				}
 			}
 			
 			if(newSizeG > oldSizeG){
 				for(int i = oldSizeG; i<newSizeG; i++) {
-					chat.chatModel.addElement(newGroups.get(i).getName());
+					chat.chatModel.addElement(newGroups.get(i));
 				}
 			}else if(newSizeG < oldSizeG){
 				for(int i = 0; i < oldGroups.size(); i++){

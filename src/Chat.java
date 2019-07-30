@@ -15,6 +15,8 @@ public class Chat extends JFrame {
 	private JScrollPane chatScrollPane;
 	private JScrollPane messScrollPane;
 	private JTextField textField;
+	private JMenuBar menuBar;
+	private JMenu menu;
 	
 	private final int WIDTH = 1500;
 	private final int HEIGHT = 900;
@@ -23,20 +25,65 @@ public class Chat extends JFrame {
 	private ArrayList<Group> groups;
 	MySQLAccess access = new MySQLAccess();
 	
-	JList<String> messList;
-	DefaultListModel<String> messageModel;
-	JList<String> chatList;
-	DefaultListModel<String> chatModel;
+	JList<Message> messageList;
+	DefaultListModel<Message> messageModel;
+	JList<Group> chatList;
+	DefaultListModel<Group> chatModel;
 	
 	private String username;
 	private final String USERID;
-	private char[] password;
+	//todo only display messages of selected group
+	String selectedGroupId;
 	
 	public static void main(String[] args) throws SQLException{
 		new Chat();
 	}
 	
 	public void initComponents(){
+		
+		menuBar = new JMenuBar();
+		menu = new JMenu();
+		menu.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
+		menu.setText("Create Group");
+		menuBar.add(menu);
+		setJMenuBar(menuBar);
+		
+		chatScrollPane.getViewport().getView().addMouseListener(new MouseListener() {
+
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				int i = chatList.getSelectedIndex();
+				selectedGroupId = chatModel.get(i).getId();
+				updateMessages();
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		
 		sendButton = new JButton();
 		sendButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
@@ -155,34 +202,31 @@ public class Chat extends JFrame {
 		passDialog.setVisible(true);
 		
 		USERID = access.getUserId(username);
-		messages = access.getMessages();
+		this.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
 		this.setTitle("EasyChat");
-		//list of messages
-		String[] messageList = new String[messages.size()];
-		for(int i = 0; i < messages.size(); i++) {
-			messageList[i] = messages.get(i).getText();
-		}
-		messageModel = new DefaultListModel<>();
-		messList = new JList<String>(messageModel);
-		for(String m : messageList){
-			messageModel.addElement(m);
-		}
-		messList.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
-		messScrollPane = new JScrollPane(messList);
 		
 		//list of groups
 		groups = access.getGroups();
-		String[] chList = new String[groups.size()];
-		for(int i = 0; i < groups.size(); i++) {
-			chList[i] = groups.get(i).getName();
-		}
+		selectedGroupId = groups.get(1).getId();
 		chatModel = new DefaultListModel<>();
-		chatList = new JList<String>(chatModel);
-		for(String m : chList){
+		chatList = new JList<Group>(chatModel);
+		for(Group m : groups){
 			chatModel.addElement(m);
 		}
 		chatList.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
 		chatScrollPane = new JScrollPane(chatList);
+		
+		//list of messages
+		messages = access.getMessages();
+		messageModel = new DefaultListModel<>();
+		messageList = new JList<Message>(messageModel);
+		for(Message m : messages){
+			if(m.getReceiverID().equals(selectedGroupId)) {
+				messageModel.addElement(m);
+			}
+		}
+		messageList.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
+		messScrollPane = new JScrollPane(messageList);
 
 		
 		initComponents();
@@ -199,18 +243,27 @@ public class Chat extends JFrame {
 		this.username = username;
 	}
 	
-	public void setPassword(char[] password) {
-		this.password = password;
-	}
-	
 	private void sendMessage(){
 		String messageid, text, receiverid;
-		//hardcoded
-		receiverid = "00000002";		
+		//TO-DO: connect groups and messages
+		receiverid = "00000001";		
 		messageid = String.format("%08d", access.getMessages().size());
 		text = textField.getText();
 		Message m = new Message(messageid, USERID, receiverid, text, false);
 		access.addMessage(m);
 		textField.setText("Write a message");
+	}
+	
+	private void updateMessages(){
+		messages = access.getMessages();
+		messageList = new JList<Message>(messageModel);
+		messageModel.clear();
+		for(Message m : messages){
+			if(m.getReceiverID().equals(selectedGroupId)) {
+				messageModel.addElement(m);
+			}
+		}
+
+	
 	}
 }

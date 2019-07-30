@@ -39,4 +39,13 @@ public class Message {
 			&& this.ID.equals(m.ID) && this.text.equals(m.text) && this.isGroup == m.isGroup;
 	}
 	
+	public void setText(String text) {
+		this.text = text;
+	}
+	
+	public String toString() {
+		return text;
+	}
+	
+	
 }

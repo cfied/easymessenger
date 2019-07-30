@@ -31,6 +31,11 @@ public class Group {
 		this.members.add(member);
 	}
 	
+	public String toString() {
+		return name;
+	}
 	
-
+	public boolean equals(Group g) {
+		return this.ID.equals(g.ID) && this.name.equals(g.name) && this.members.equals(g.members);
+	}
 }

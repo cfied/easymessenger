@@ -4,17 +4,7 @@ import java.util.HashMap;
 
 public class MySQLAccess {
 	Connection con;
-	public static void main(String[] args) throws SQLException{
-		MySQLAccess access = new MySQLAccess();
-		
-		access.connectToMysql("127.0.0.1:3306", "easymessenger", "testuser", "testpassword");
-		access.getMessages();
-		//access.addMessage(new Message("00000005","00000004","Hey, nice to meet you!"));
-		access.deleteMessage("00000004");
-		access.getMessages();
-	}
-		
-		
+	
 	public void connectToMysql(String host, String database, String user, String passwd) throws SQLException{
 		try {	
 			Class.forName("com.mysql.jdbc.Driver");
@@ -53,6 +43,28 @@ public class MySQLAccess {
 		}
 	}
 	
+	public boolean addUser(String username, String password){
+		try {
+			PreparedStatement stmt = con.prepareStatement("select user_name from users where user_name = ?");
+			stmt.setString(1, username);
+			ResultSet rs = stmt.executeQuery();
+			if(rs.next()){
+				return false;
+			}else{
+				stmt = con.prepareStatement("insert into users values (?, ?, ?)");
+				stmt.setString(1, String.format("%08d", getMessages().size()));
+				stmt.setString(2, username);
+				stmt.setString(3, password);
+				stmt.executeUpdate();
+				return true;
+			}
+		}catch(Exception e) {
+			System.out.println(e);
+			return false;
+		}
+		
+	}
+	
 	public ArrayList<Message> getMessages(){
 		ArrayList<Message> results = new ArrayList<>();
 		String r1, r2, r3, r4;
@@ -66,8 +78,7 @@ public class MySQLAccess {
 				r3 = rs.getString(3);
 				r4 = rs.getString(4);
 				r5 = rs.getBoolean(5);
-				
-				//System.out.println(r1 + " " + r2 + " " + r3);
+
 				results.add(new Message(r1, r2, r3, r4, r5));
 			}
 			return results;
