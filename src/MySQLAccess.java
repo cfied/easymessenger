@@ -29,13 +29,17 @@ public class MySQLAccess {
 		}
 	}
 	
-	public String getUserId(String username) {
+	public User getUser(String username) {
 		try {	
 			PreparedStatement stmt = con.prepareStatement("select user_id from users where user_name = ?");
 			stmt.setString(1, username);
 			ResultSet rs = stmt.executeQuery();
 			rs.next();
-			return rs.getString(1);
+			//hardcoded friends
+			ArrayList<User> friends = new ArrayList<>();
+			friends.add(new User("00000005","Paul", null, null));
+			friends.add(new User("00000006","Johann", null, null));
+			return new User(rs.getString(1), username, friends, null);
 			
 		}catch(Exception e) {
 			System.out.println(e);
@@ -105,13 +109,14 @@ public class MySQLAccess {
 		}
 	}
 	
-	public ArrayList<Group> getGroups(){
+	public ArrayList<Group> getGroups(String userId){
 		ArrayList<Group> results = new ArrayList<>();
 		ArrayList<String> ids = new ArrayList<>();
 		//get all group ids
 		try{
-			Statement stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery("select distinct group_id from user_groups");
+			PreparedStatement stmt = con.prepareStatement("select distinct group_id from user_groups where user_id = ?");
+			stmt.setString(1, userId);
+			ResultSet rs = stmt.executeQuery();
 			while(rs.next()){
 				ids.add(rs.getString(1));				
 			}
@@ -137,6 +142,21 @@ public class MySQLAccess {
 		}catch(Exception e){
 			System.out.println(e);
 			return null;
+		}
+	}
+	
+	//TO-DO: check if user exists when creating group
+	public void addGroup(Group g) {
+		try{
+			PreparedStatement stmt = con.prepareStatement("insert into user_groups(group_name, group_id, user_id) values (?, ?, ?)");
+			stmt.setString(1, g.getName());
+			stmt.setString(2, g.getId());
+			for(String member : g.getMembers()) {
+				stmt.setString(3, member);
+				stmt.executeUpdate();
+			}
+		}catch(Exception e){
+			System.out.println(e);
 		}
 	}
 	

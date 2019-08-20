@@ -14,20 +14,26 @@ public class Update extends Thread{
 		this.chat = chat;
 		access = chat.access;
 		oldMessages = access.getMessages();
-		oldGroups = access.getGroups();
+		oldGroups = access.getGroups(chat.user.getId());
 	}
 	
 	//@Override
 	public void run() {
 		while(true) {
+			try {
+				sleep(1);
+			} catch (InterruptedException e) {
+				System.out.println(e);
+			}
 			newMessages = access.getMessages();
-			newGroups = access.getGroups();
+			newGroups = access.getGroups(chat.user.getId());
 			
 			int oldSizeM = oldMessages.size();
 			int newSizeM = newMessages.size();
 			int oldSizeG = oldGroups.size();
 			int newSizeG = newGroups.size();
 			
+			//add new Messages
 			if(newSizeM > oldSizeM){
 				Message m;
 				for(int i = oldSizeM; i<newSizeM; i++) {
@@ -44,6 +50,7 @@ public class Update extends Thread{
 				}
 			}
 			
+			//remove deleted elements
 			if(newSizeG > oldSizeG){
 				for(int i = oldSizeG; i<newSizeG; i++) {
 					chat.chatModel.addElement(newGroups.get(i));

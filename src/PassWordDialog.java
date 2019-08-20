@@ -70,7 +70,7 @@ public class PassWordDialog extends JDialog {
 					access.connectToMysql("127.0.0.1:3306", "easymessenger", "testuser", "testpassword");
 					//TO-DO Hashing and Salting, use char[]
 					if(access.checkPassword(username, password)){
-						parent.setUsername(username);
+						parent.setUser(access.getUser(username));
 						parent.access = access;
 						setVisible(false);
 					}else{
@@ -100,7 +100,7 @@ public class PassWordDialog extends JDialog {
 					String password = jpfPassword.getText();
 					access.connectToMysql("127.0.0.1:3306", "easymessenger", "testuser", "testpassword");
 					if(access.addUser(username, password)){
-						parent.setUsername(username);
+						parent.setUser(access.getUser(username));
 						parent.access = access;
 						setVisible(false);
 					}else{

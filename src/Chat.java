@@ -9,6 +9,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseListener;
 
 import javax.swing.*;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
 public class Chat extends JFrame {
 	private JButton sendButton;
@@ -16,7 +18,8 @@ public class Chat extends JFrame {
 	private JScrollPane messScrollPane;
 	private JTextField textField;
 	private JMenuBar menuBar;
-	private JMenu menu;
+	private JMenu createGroupMenu;
+	private JMenu addFriendMenu;
 	
 	private final int WIDTH = 1500;
 	private final int HEIGHT = 900;
@@ -30,10 +33,20 @@ public class Chat extends JFrame {
 	JList<Group> chatList;
 	DefaultListModel<Group> chatModel;
 	
-	private String username;
-	private final String USERID;
-	//todo only display messages of selected group
+	//change to user object
+	User user;
 	String selectedGroupId;
+	
+	
+	/*TO DO
+	 * 
+	 * deal with no selectedGroupId
+	 * add foreign keys and not null constraints in database
+	 * add create group option
+	 * add password checking, hashing
+	 * selecting messages
+	 * 
+	 * */
 	
 	public static void main(String[] args) throws SQLException{
 		new Chat();
@@ -42,10 +55,58 @@ public class Chat extends JFrame {
 	public void initComponents(){
 		
 		menuBar = new JMenuBar();
-		menu = new JMenu();
-		menu.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
-		menu.setText("Create Group");
-		menuBar.add(menu);
+		createGroupMenu = new JMenu();
+		createGroupMenu.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
+		createGroupMenu.setText("Create Group");
+		createGroupMenu.addMenuListener(new MenuListener(){
+
+			@Override
+			public void menuCanceled(MenuEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void menuDeselected(MenuEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void menuSelected(MenuEvent e) {
+				CreateGroupDialog c = new CreateGroupDialog(user);
+				
+			}
+			
+		});
+		menuBar.add(createGroupMenu);
+		addFriendMenu = new JMenu();
+		addFriendMenu.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
+		addFriendMenu.setText("Add friend");
+		//TO-DO: add addFriend option
+		addFriendMenu.addMenuListener(new MenuListener(){
+
+			@Override
+			public void menuCanceled(MenuEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void menuDeselected(MenuEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void menuSelected(MenuEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		menuBar.add(addFriendMenu);
+		
 		setJMenuBar(menuBar);
 		
 		chatScrollPane.getViewport().getView().addMouseListener(new MouseListener() {
@@ -87,7 +148,7 @@ public class Chat extends JFrame {
 		sendButton = new JButton();
 		sendButton.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				//hardcoded user, messageid depends on number of messages in db
+				//messageid depends on number of messages in db
 				//hence pay attention to deleted messages
 				sendMessage();
 			}
@@ -197,17 +258,19 @@ public class Chat extends JFrame {
 	
 	
 	public Chat() throws SQLException{
-		//precreated user
 		PassWordDialog passDialog = new PassWordDialog(this, true);
 		passDialog.setVisible(true);
-		
-		USERID = access.getUserId(username);
+
 		this.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
 		this.setTitle("EasyChat");
 		
 		//list of groups
-		groups = access.getGroups();
-		selectedGroupId = groups.get(1).getId();
+		groups = access.getGroups(user.getId());
+		if(groups.isEmpty()){
+			selectedGroupId = null;
+		}else{
+			selectedGroupId = groups.get(0).getId();
+		}
 		chatModel = new DefaultListModel<>();
 		chatList = new JList<Group>(chatModel);
 		for(Group m : groups){
@@ -221,13 +284,17 @@ public class Chat extends JFrame {
 		messageModel = new DefaultListModel<>();
 		messageList = new JList<Message>(messageModel);
 		for(Message m : messages){
-			if(m.getReceiverID().equals(selectedGroupId)) {
-				messageModel.addElement(m);
+			try{
+				if(m.getReceiverID().equals(selectedGroupId)) {
+					messageModel.addElement(m);
+				}
+			}catch(NullPointerException ex){
+				System.out.println("No groups");
 			}
 		}
 		messageList.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
 		messScrollPane = new JScrollPane(messageList);
-
+		messageList.setCellRenderer(new MyCellRenderer(user.getId(), messageModel));
 		
 		initComponents();
 		
@@ -239,17 +306,15 @@ public class Chat extends JFrame {
 		update.run();
 	}
 	
-	public void setUsername(String username) {
-		this.username = username;
+	public void setUser(User user) {
+		this.user = user;
 	}
 	
 	private void sendMessage(){
-		String messageid, text, receiverid;
-		//TO-DO: connect groups and messages
-		receiverid = "00000001";		
+		String messageid, text;		
 		messageid = String.format("%08d", access.getMessages().size());
 		text = textField.getText();
-		Message m = new Message(messageid, USERID, receiverid, text, false);
+		Message m = new Message(messageid, user.getId(), selectedGroupId, text, false);
 		access.addMessage(m);
 		textField.setText("Write a message");
 	}
