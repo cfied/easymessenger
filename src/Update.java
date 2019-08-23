@@ -52,6 +52,7 @@ public class Update extends Thread{
 			
 			//remove deleted elements
 			if(newSizeG > oldSizeG){
+				System.out.println("New groups");
 				for(int i = oldSizeG; i<newSizeG; i++) {
 					chat.chatModel.addElement(newGroups.get(i));
 				}

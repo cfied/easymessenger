@@ -1,14 +1,9 @@
 //dialog window to enter new group details
-/*
- * TO-DO: display friends in combobox, think about identifier, maybe add user class
- * call the add-group method
- */
+
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -27,12 +22,13 @@ public class CreateGroupDialog extends JDialog {
 	
 	private ArrayList<User> members = new ArrayList<>();
 	
-	public CreateGroupDialog(User user) {
-		this(null, true, user);
+	public CreateGroupDialog(User user, MySQLAccess access) {
+		this(null, true, user, access);
 	}
 	
-	public CreateGroupDialog(final Chat parent, boolean modal, User user) {
+	public CreateGroupDialog(final Chat parent, boolean modal, User user, MySQLAccess access) {
 		super(parent, modal);
+		members.add(user);
 		for(User u : user.getFriends()) {
 			jcbMembers.addItem(u);
 		}
@@ -47,7 +43,15 @@ public class CreateGroupDialog extends JDialog {
 		p2.add(jlblChoose);
 		p2.add(jcbMembers);
 		
+		JPanel p3 = new JPanel();
+		p3.add(jbtCreate);
+		p3.add(jbtCancel);
+		
+		JPanel p1 = new JPanel();
+		p1.add(p3, BorderLayout.CENTER);
+		
 		add(p2, BorderLayout.CENTER);
+		add(p1, BorderLayout.SOUTH);
 		pack();
 		setLocationRelativeTo(null);
 		
@@ -57,11 +61,25 @@ public class CreateGroupDialog extends JDialog {
 			public void actionPerformed(ActionEvent arg0) {
 				User user = (User) jcbMembers.getSelectedItem();
 				members.add(user);
-				jlblChosen.setText(jlblChosen.getText().concat(user.getName()).concat(", "));
-				System.out.println("Chosen");
-				
+				jlblChosen.setText(jlblChosen.getText().concat(user.getName()).concat(", "));		
 			}
-			
+		});
+		
+		jbtCreate.addActionListener(new ActionListener() {	
+			@Override
+			public void actionPerformed(ActionEvent arg0) {	
+				Group g = new Group(access.generateId(), jtfGroupname.getText(),members);
+				access.addGroup(g);
+				System.out.println(g);
+				dispose();
+			}
+		});
+		
+		jbtCancel.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				dispose();
+			}
 		});
 		
 		setVisible(true);

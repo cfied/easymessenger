@@ -117,24 +117,30 @@ public class MySQLAccess {
 			PreparedStatement stmt = con.prepareStatement("select distinct group_id from user_groups where user_id = ?");
 			stmt.setString(1, userId);
 			ResultSet rs = stmt.executeQuery();
+			ResultSet rsUsername;
 			while(rs.next()){
 				ids.add(rs.getString(1));				
 			}
 			//for every group id query all members
-			ArrayList<String> members;
+			ArrayList<User> members;
 			String name;
-			PreparedStatement prepStmt = con.prepareStatement("select user_id from user_groups where group_id = ?");
-			PreparedStatement prepStmt2 = con.prepareStatement("select distinct group_name from user_groups where group_id = ?");
+			PreparedStatement prepStmtUserId = con.prepareStatement("select user_id from user_groups where group_id = ?");
+			PreparedStatement prepStmtGroupName = con.prepareStatement("select distinct group_name from user_groups where group_id = ?");
+			PreparedStatement prepStmtUserName = con.prepareStatement("select user_name from users where user_id = ?");
 			for(String id : ids) {
 				members = new ArrayList<>();
-				prepStmt.setString(1, id);
-				prepStmt2.setString(1, id);
-				rs = prepStmt2.executeQuery();
+				prepStmtUserId.setString(1, id);
+				prepStmtGroupName.setString(1, id);
+				rs = prepStmtGroupName.executeQuery();
 				rs.next();
 				name = rs.getString(1);
-				rs = prepStmt.executeQuery();
+				rs = prepStmtUserId.executeQuery();
 				while(rs.next()){
-					members.add(rs.getString(1));
+					String userid = rs.getString(1);
+					prepStmtUserName.setString(1, userid);
+					rsUsername = prepStmtUserName.executeQuery();
+					rsUsername.next();
+					members.add(new User(userid, rsUsername.getString(1), null, null));
 				}
 				results.add(new Group(id,name,members));		
 			}
@@ -151,12 +157,34 @@ public class MySQLAccess {
 			PreparedStatement stmt = con.prepareStatement("insert into user_groups(group_name, group_id, user_id) values (?, ?, ?)");
 			stmt.setString(1, g.getName());
 			stmt.setString(2, g.getId());
-			for(String member : g.getMembers()) {
-				stmt.setString(3, member);
+			for(User member : g.getMembers()) {
+				stmt.setString(3, member.getId());
 				stmt.executeUpdate();
 			}
 		}catch(Exception e){
 			System.out.println(e);
+		}
+	}
+	
+	public String generateId(){
+		try{
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery("select max(group_id) from user_groups");
+			rs.next();
+			String str = rs.getString(1);
+			if(str != null){
+				System.out.println(str);
+				int result = Integer.parseInt(str);
+				result++;
+				String resultString = String.format("%08d", result);
+				System.out.println(resultString);
+				return resultString;
+			}else{
+				return "00000000";
+			}
+		}catch(Exception e){
+			System.out.println(e);
+			return null;
 		}
 	}
 	

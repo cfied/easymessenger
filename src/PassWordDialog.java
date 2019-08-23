@@ -13,7 +13,6 @@ public class PassWordDialog extends JDialog {
 	private final JButton jbtSignIn = new JButton("Sign in");
 	private final JButton jbtSignUp = new JButton("Sign up");
 	
-	//what's that for?
 	private final JLabel jlblStatus = new JLabel(" ");
 	
 	public PassWordDialog(){

@@ -3,9 +3,9 @@ import java.util.ArrayList;
 public class Group {
 	private final String ID;
 	private String name;
-	private ArrayList<String> members;
+	private ArrayList<User> members;
 
-	public Group(String ID, String name, ArrayList<String> members) {
+	public Group(String ID, String name, ArrayList<User> members) {
 		this.ID = ID;
 		this.name = name;
 		this.members = members;
@@ -19,7 +19,7 @@ public class Group {
 		return name;
 	}
 
-	public ArrayList<String> getMembers() {
+	public ArrayList<User> getMembers() {
 		return members;
 	}
 	
@@ -27,7 +27,7 @@ public class Group {
 		this.name = name;
 	}
 	
-	public void addMember(String member) {
+	public void addMember(User member) {
 		this.members.add(member);
 	}
 	

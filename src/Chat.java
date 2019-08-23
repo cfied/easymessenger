@@ -48,8 +48,7 @@ public class Chat extends JFrame {
 	 * 
 	 * */
 	
-	public static void main(String[] args) throws SQLException{
-		new Chat();
+	public static void main(String[] args) throws SQLException{		new Chat();
 	}
 	
 	public void initComponents(){
@@ -74,7 +73,7 @@ public class Chat extends JFrame {
 
 			@Override
 			public void menuSelected(MenuEvent e) {
-				CreateGroupDialog c = new CreateGroupDialog(user);
+				new CreateGroupDialog(user, access);
 				
 			}
 			
@@ -113,9 +112,13 @@ public class Chat extends JFrame {
 
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				int i = chatList.getSelectedIndex();
-				selectedGroupId = chatModel.get(i).getId();
-				updateMessages();
+				try{
+					int i = chatList.getSelectedIndex();
+					selectedGroupId = chatModel.get(i).getId();
+					updateMessages();
+				}catch(java.lang.ArrayIndexOutOfBoundsException e){
+					
+				}
 				
 			}
 
@@ -311,6 +314,7 @@ public class Chat extends JFrame {
 	}
 	
 	private void sendMessage(){
+		if(selectedGroupId == null){ return;}
 		String messageid, text;		
 		messageid = String.format("%08d", access.getMessages().size());
 		text = textField.getText();
@@ -328,7 +332,5 @@ public class Chat extends JFrame {
 				messageModel.addElement(m);
 			}
 		}
-
-	
 	}
 }
