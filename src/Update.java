@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 
+import javax.swing.SwingUtilities;
+
 public class Update extends Thread{
 	private MySQLAccess access;
 	private ArrayList<Message> oldMessages;
@@ -35,33 +37,50 @@ public class Update extends Thread{
 			
 			//add new Messages
 			if(newSizeM > oldSizeM){
-				Message m;
-				for(int i = oldSizeM; i<newSizeM; i++) {
-					m = newMessages.get(i);
-					if(chat.selectedGroupId.equals(m.getReceiverID()))
-					chat.messageModel.addElement(m);
-				}
-			}else if(newSizeM < oldSizeM){
-				for(int i = 0; i < oldMessages.size(); i++){
-					if(!newMessages.contains(oldMessages.get(i))){
-						//should messages be renumbered?
-						chat.messageModel.get(Integer.parseInt(oldMessages.get(i).getID())).setText("This message has been removed");
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run(){
+						Message m;
+						for(int i = oldSizeM; i<newSizeM; i++) {
+							m = newMessages.get(i);
+							if(chat.selectedGroupId.equals(m.getReceiverID()))
+							chat.messageModel.addElement(m);
+						}
 					}
-				}
+				});	
+			}else if(newSizeM < oldSizeM){
+				
+				//should messages be renumbered?
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run(){
+						for(int i = 0; i < oldMessages.size(); i++){
+							if(!newMessages.contains(oldMessages.get(i))){
+								chat.messageModel.get(Integer.parseInt(oldMessages.get(i).getID())).setText("This message has been removed");
+							}
+						}
+					}
+				});
 			}
 			
 			//remove deleted elements
 			if(newSizeG > oldSizeG){
 				System.out.println("New groups");
-				for(int i = oldSizeG; i<newSizeG; i++) {
-					chat.chatModel.addElement(newGroups.get(i));
-				}
-			}else if(newSizeG < oldSizeG){
-				for(int i = 0; i < oldGroups.size(); i++){
-					if(!newGroups.contains(oldGroups.get(i))){
-						chat.chatModel.removeElement((oldGroups).get(i));
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run(){
+						for(int i = oldSizeG; i<newSizeG; i++) {
+							chat.chatModel.addElement(newGroups.get(i));
+						}
 					}
-				}
+				});
+			}else if(newSizeG < oldSizeG){
+				SwingUtilities.invokeLater(new Runnable(){
+					public void run(){
+						for(int i = 0; i < oldGroups.size(); i++){
+							if(!newGroups.contains(oldGroups.get(i))){
+								chat.chatModel.removeElement((oldGroups).get(i));
+							}
+						}
+					}
+				});
 			}
 			oldMessages = newMessages;
 			oldGroups = newGroups;

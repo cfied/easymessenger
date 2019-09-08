@@ -48,7 +48,8 @@ public class Chat extends JFrame {
 	 * 
 	 * */
 	
-	public static void main(String[] args) throws SQLException{		new Chat();
+	public static void main(String[] args) throws SQLException{
+		new Chat();
 	}
 	
 	public void initComponents(){
@@ -57,23 +58,35 @@ public class Chat extends JFrame {
 		createGroupMenu = new JMenu();
 		createGroupMenu.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
 		createGroupMenu.setText("Create Group");
-		createGroupMenu.addMenuListener(new MenuListener(){
+		createGroupMenu.addMouseListener(new MouseListener(){
 
 			@Override
-			public void menuCanceled(MenuEvent arg0) {
+			public void mouseClicked(MouseEvent e) {
+				new CreateGroupDialog(Chat.this, true, user, access);
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
 				// TODO Auto-generated method stub
 				
 			}
 
 			@Override
-			public void menuDeselected(MenuEvent e) {
+			public void mouseExited(MouseEvent e) {
 				// TODO Auto-generated method stub
 				
 			}
 
 			@Override
-			public void menuSelected(MenuEvent e) {
-				new CreateGroupDialog(user, access);
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
 				
 			}
 			
@@ -83,22 +96,34 @@ public class Chat extends JFrame {
 		addFriendMenu.setFont(new Font("Comic Sans Ms", Font.PLAIN, 20));
 		addFriendMenu.setText("Add friend");
 		//TO-DO: add addFriend option
-		addFriendMenu.addMenuListener(new MenuListener(){
+		addFriendMenu.addMouseListener(new MouseListener(){
 
 			@Override
-			public void menuCanceled(MenuEvent arg0) {
+			public void mouseClicked(MouseEvent arg0) {
+				new AddFriendDialog(Chat.this, true, user, access);
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
 				// TODO Auto-generated method stub
 				
 			}
 
 			@Override
-			public void menuDeselected(MenuEvent arg0) {
+			public void mouseExited(MouseEvent arg0) {
 				// TODO Auto-generated method stub
 				
 			}
 
 			@Override
-			public void menuSelected(MenuEvent arg0) {
+			public void mousePressed(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
 				// TODO Auto-generated method stub
 				
 			}

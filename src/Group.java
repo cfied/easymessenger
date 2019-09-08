@@ -10,7 +10,7 @@ public class Group {
 		this.name = name;
 		this.members = members;
 	}
-	
+
 	public String getId() {
 		return ID;
 	}

@@ -22,10 +22,6 @@ public class CreateGroupDialog extends JDialog {
 	
 	private ArrayList<User> members = new ArrayList<>();
 	
-	public CreateGroupDialog(User user, MySQLAccess access) {
-		this(null, true, user, access);
-	}
-	
 	public CreateGroupDialog(final Chat parent, boolean modal, User user, MySQLAccess access) {
 		super(parent, modal);
 		members.add(user);
@@ -33,25 +29,25 @@ public class CreateGroupDialog extends JDialog {
 			jcbMembers.addItem(u);
 		}
 		
-		JPanel p2 = new JPanel(new GridLayout(3,2));
-		p2.add(jlblGroupname);
-		p2.add(jtfGroupname);
+		JPanel p1= new JPanel(new GridLayout(3,2));
+		p1.add(jlblGroupname);
+		p1.add(jtfGroupname);
 
-		p2.add(jlblMembers);
-		p2.add(jlblChosen);
+		p1.add(jlblMembers);
+		p1.add(jlblChosen);
 
-		p2.add(jlblChoose);
-		p2.add(jcbMembers);
+		p1.add(jlblChoose);
+		p1.add(jcbMembers);
 		
 		JPanel p3 = new JPanel();
 		p3.add(jbtCreate);
 		p3.add(jbtCancel);
 		
-		JPanel p1 = new JPanel();
-		p1.add(p3, BorderLayout.CENTER);
+		JPanel p2 = new JPanel();
+		p2.add(p3, BorderLayout.CENTER);
 		
-		add(p2, BorderLayout.CENTER);
-		add(p1, BorderLayout.SOUTH);
+		add(p1, BorderLayout.CENTER);
+		add(p2, BorderLayout.SOUTH);
 		pack();
 		setLocationRelativeTo(null);
 		
@@ -68,7 +64,7 @@ public class CreateGroupDialog extends JDialog {
 		jbtCreate.addActionListener(new ActionListener() {	
 			@Override
 			public void actionPerformed(ActionEvent arg0) {	
-				Group g = new Group(access.generateId(), jtfGroupname.getText(),members);
+				Group g = new Group(access.generateId(), jtfGroupname.getText(), members);
 				access.addGroup(g);
 				System.out.println(g);
 				dispose();

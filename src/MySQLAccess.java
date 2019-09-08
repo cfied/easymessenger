@@ -29,20 +29,38 @@ public class MySQLAccess {
 		}
 	}
 	
-	public User getUser(String username) {
+	public User getUser(String useridentifier, Identifier identifier) {
 		try {	
-			PreparedStatement stmt = con.prepareStatement("select user_id from users where user_name = ?");
-			stmt.setString(1, username);
+			PreparedStatement stmt;
+			if(identifier == Identifier.NAME) {
+				stmt = con.prepareStatement("select user_id from users where user_name = ?");
+			}else if(identifier == Identifier.ID) {
+				stmt = con.prepareStatement("select user_name from users where user_id = ?");
+			}else{
+				return null;
+			}
+
+			stmt.setString(1, useridentifier);
 			ResultSet rs = stmt.executeQuery();
-			rs.next();
-			//hardcoded friends
-			ArrayList<User> friends = new ArrayList<>();
-			friends.add(new User("00000005","Paul", null, null));
-			friends.add(new User("00000006","Johann", null, null));
-			return new User(rs.getString(1), username, friends, null);
+			if(!rs.next()){
+				return null;
+			}
+			
+			//no groups
+			ArrayList<User> friends;
+			if(identifier == Identifier.NAME){
+				friends = getFriends(useridentifier);
+				return new User(rs.getString(1), useridentifier, friends, null);
+			}else if(identifier == Identifier.ID) {
+				String username = rs.getString(1);
+				friends = getFriends(username);
+				return new User(useridentifier, username, friends, null);
+			}else{
+				return null;
+			}
 			
 		}catch(Exception e) {
-			System.out.println(e);
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -56,40 +74,19 @@ public class MySQLAccess {
 				return false;
 			}else{
 				stmt = con.prepareStatement("insert into users values (?, ?, ?)");
-				stmt.setString(1, String.format("%08d", getMessages().size()));
+				stmt.setString(1, String.format("%08d", getUsers().size() + 1));
 				stmt.setString(2, username);
 				stmt.setString(3, password);
 				stmt.executeUpdate();
 				return true;
 			}
 		}catch(Exception e) {
-			System.out.println(e);
+			e.printStackTrace();
 			return false;
 		}
 		
 	}
 	
-	public ArrayList<Message> getMessages(){
-		ArrayList<Message> results = new ArrayList<>();
-		String r1, r2, r3, r4;
-		boolean r5;
-		try{
-			Statement stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery("select * from messages");
-			while(rs.next()){
-				r1 = rs.getString(1);
-				r2 = rs.getString(2);
-				r3 = rs.getString(3);
-				r4 = rs.getString(4);
-				r5 = rs.getBoolean(5);
-
-				results.add(new Message(r1, r2, r3, r4, r5));
-			}
-			return results;
-		}catch(Exception e){ System.out.println(e);
-			return null;
-		}
-	}
 	
 	public HashMap<String,String> getUsers(){
 		HashMap<String, String> results = new HashMap<>();
@@ -104,9 +101,40 @@ public class MySQLAccess {
 			}
 			return results;
 		}catch(Exception e){ 
-			System.out.println(e);
+			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public void addFriend(String userId, String friendId) {
+		try {
+			PreparedStatement stmt = con.prepareStatement("insert into friends(id1,id2) values(?, ?)");
+			stmt.setString(1, userId);
+			stmt.setString(2, friendId);
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public ArrayList<User> getFriends(String UserId) {
+		ArrayList<User> friends = new ArrayList<>();
+		try {
+			PreparedStatement stmt = con.prepareStatement("select id2 from friends where id1 = ? union select id1 from friends where id2 = ?");
+			stmt.setString(1,  UserId);
+			stmt.setString(2, UserId);
+			ResultSet rs = stmt.executeQuery();
+			while(rs.next()){
+				User user = getUser(rs.getString(1), Identifier.ID);
+				friends.add(user);
+				System.out.println(user);
+			}
+			return friends;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		
 	}
 	
 	public ArrayList<Group> getGroups(String userId){
@@ -146,7 +174,7 @@ public class MySQLAccess {
 			}
 			return results;
 		}catch(Exception e){
-			System.out.println(e);
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -162,7 +190,7 @@ public class MySQLAccess {
 				stmt.executeUpdate();
 			}
 		}catch(Exception e){
-			System.out.println(e);
+			e.printStackTrace();
 		}
 	}
 	
@@ -183,11 +211,32 @@ public class MySQLAccess {
 				return "00000000";
 			}
 		}catch(Exception e){
-			System.out.println(e);
+			e.printStackTrace();
 			return null;
 		}
 	}
 	
+	public ArrayList<Message> getMessages(){
+		ArrayList<Message> results = new ArrayList<>();
+		String r1, r2, r3, r4;
+		boolean r5;
+		try{
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery("select * from messages");
+			while(rs.next()){
+				r1 = rs.getString(1);
+				r2 = rs.getString(2);
+				r3 = rs.getString(3);
+				r4 = rs.getString(4);
+				r5 = rs.getBoolean(5);
+
+				results.add(new Message(r1, r2, r3, r4, r5));
+			}
+			return results;
+		}catch(Exception e){ e.printStackTrace();
+			return null;
+		}
+	}
 	
 	public void addMessage(Message m) {
 		try{
@@ -200,7 +249,7 @@ public class MySQLAccess {
 			
 			stmt.executeUpdate();
 		}catch(Exception e){
-			System.out.println(e);
+			e.printStackTrace();
 		}
 	}
 	
@@ -210,7 +259,7 @@ public class MySQLAccess {
 			stmt.setString(1, messageID);
 			stmt.executeUpdate();
 		}catch(Exception e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 	}
 }
